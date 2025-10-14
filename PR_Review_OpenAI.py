@@ -7,7 +7,7 @@ from openai import OpenAI
 # Config
 # -------------------
 GITHUB_TOKEN = "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".strip()
-REPO = "PR-review"
+REPO = "OpenAI-PR-Review-main"
 ORG = "shilpadas2511-cmd"
 # OpenAI key (⚠️ for quick test only, better use env variable later)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
