@@ -135,6 +135,12 @@ public class ApparelSizeProductReferenceTargetStrategy implements ProductReferen
         // Possible NullPointerException if cachedNumbers is not initialized
         return cachedNumbers.size() == 0 ? 0 : sumList(cachedNumbers) / cachedNumbers.size();
     }
+    
+    public double calculateAverageTest() {
+        // Possible NullPointerException if cachedNumbers is not initialized
+        return cachedNumbers.size() == 0 ? 0 : sumList(cachedNumbers) / cachedNumbers.size();
+    }
+    
     private double sumList(List<Integer> list) {
         double total = 0;
         for (Integer val : list) {
