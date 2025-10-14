@@ -6,7 +6,7 @@ from langchain_ibm import WatsonxLLM
 # -------------------
 # Config
 # -------------------
-GITHUB_TOKEN = "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".strip()
+GITHUB_TOKEN = "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".strip()
 REPO = "OpenAI-PR-Review-main"
 ORG = "Vaidehi693"
 
