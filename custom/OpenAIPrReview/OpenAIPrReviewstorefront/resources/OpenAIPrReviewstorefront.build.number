@@ -1,0 +1,11 @@
+#Ant properties
+#Mon Mar 31 19:07:40 CEST 2025
+version.api=2211
+vendor=hybris
+group.id=de.hybris.platform
+name=OpenAIPrReviewstorefront
+description=OpenAIPrReviewstorefront
+builddate=20250331 1900
+releasedate=20250314 1554
+version=2211.38
+module.name=platform-module
