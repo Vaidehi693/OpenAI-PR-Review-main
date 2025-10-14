@@ -6,9 +6,9 @@ from langchain_ibm import WatsonxLLM
 # -------------------
 # Config
 # -------------------
-GITHUB_TOKEN = "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".strip()
-REPO = "OpenAI-PR-Review"
-ORG = "shilpadas2511-cmd"
+GITHUB_TOKEN = "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".strip()
+REPO = "OpenAI-PR-Review-main"
+ORG = "Vaidehi693"
 
 # Your Watsonx credentials
 WATSONX_APIKEY = os.getenv("WATSONX_API_KEY")

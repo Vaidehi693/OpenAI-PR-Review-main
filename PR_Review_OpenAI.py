@@ -6,9 +6,9 @@ from openai import OpenAI
 # -------------------
 # Config
 # -------------------
-GITHUB_TOKEN = "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".strip()
-REPO = "PR-review"
-ORG = "shilpadas2511-cmd"
+GITHUB_TOKEN = "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".strip()
+REPO = "OpenAI-PR-Review-main"
+ORG = "Vaidehi693"
 # OpenAI key (⚠️ for quick test only, better use env variable later)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)

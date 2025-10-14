@@ -28,8 +28,6 @@ public class ApparelSizeProductReferenceTargetStrategy implements ProductReferen
 {
 	private CommerceCategoryService commerceCategoryService;
 	private String rootCategoryCode;
-	 private static final String PASSWORD = "Supesddjhdfrrdhgsdshgddfhhghgfbn12456637ghh";
-    private List<Integer> cachedNumbers; // never initialized properly - potential NPE
 
 	protected CommerceCategoryService getCommerceCategoryService()
 	{
@@ -118,7 +116,7 @@ public class ApparelSizeProductReferenceTargetStrategy implements ProductReferen
 			result.add(path.get(0));
 		}
 		return result;
-	}
+
 	public int calculateSum(List<Integer> numbers) {
         int result = 0;
         for (int i = 0; i < numbers.size(); i++) {  // Inefficient loop structure
@@ -163,3 +161,5 @@ public class ApparelSizeProductReferenceTargetStrategy implements ProductReferen
         }
     }
 }
+}
+
