@@ -4,14 +4,21 @@ on:
   pull_request:
     types: [opened, synchronize, edited, reopened]
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
   pr-review:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Debug: list repo tree
+        run: |
+          pwd
+          ls -la
+          ls -la .github
+          ls -la .github/actions
+          ls -la .github/actions/setup
+
       - name: Setup & Dependencies
         uses: ./.github/actions/setup
         with:
