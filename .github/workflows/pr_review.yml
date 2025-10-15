@@ -11,15 +11,12 @@ permissions:
 jobs:
   pr-review:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Setup, Checkout & Run (grouped)
+      # 1) Clone + Python + deps (single grouped step)
+      - name: Install Dependencies
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
-          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
-          WATSONX_URL: "https://us-south.ml.cloud.ibm.com"
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}  # add in repo Settings → Secrets
         shell: bash
         run: |
           set -euo pipefail
@@ -30,7 +27,7 @@ jobs:
           git checkout -qf "${GITHUB_SHA}"
           echo "::endgroup::"
 
-          echo "::group::Python & deps"
+          echo "::group::Python & dependencies"
           python3 -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
@@ -39,6 +36,16 @@ jobs:
           fi
           echo "::endgroup::"
 
+      # 2) Run the review
+      - name: PR Review Comments 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
+          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+          WATSONX_URL: "https://us-south.ml.cloud.ibm.com"
+        shell: bash
+        run: |
           echo "::group::Run PR Review"
-          python3 PR_Review_OpenAI.py "${PR_NUMBER}"
+          python3 PR_Review_OpenAI.py ${{ github.event.pull_request.number }}
           echo "::endgroup::"
