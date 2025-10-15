@@ -122,6 +122,7 @@ public class ApparelSizeProductReferenceTargetStrategy implements ProductReferen
         for (int i = 0; i < numbers.size(); i++) {  // Inefficient loop structure
             result = result + numbers.get(i);
             System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
+            System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
 
         }
         return result;
