@@ -7,14 +7,31 @@ on:
 jobs:
   pr-review:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Setup & Dependencies
-        uses: ./.github/actions/setup
-        with:
-          python-version: "3.11"
+    steps:
+      - name: Grouped Setup (Checkout + Python + Dependencies)
+        shell: bash
+        run: |
+          echo "::group::Checkout code"
+          git clone --depth=1 "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" repo
+          cd repo
+          git fetch --no-tags origin "${GITHUB_SHA}" --depth=1
+          git checkout -qf "${GITHUB_SHA}"
+          echo "::endgroup::"
+
+          echo "::group::Set up Python"
+          sudo apt-get update -y
+          sudo apt-get install -y python3 python3-pip
+          python3 -m pip install --upgrade pip
+          echo "::endgroup::"
+
+          echo "::group::Install dependencies"
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install requests openai
+          fi
+          echo "::endgroup::"
 
       - name: Run AI PR Review
         env:
@@ -24,4 +41,6 @@ jobs:
           WATSONX_URL: "https://us-south.ml.cloud.ibm.com"
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python PR_Review_OpenAI.py ${{ github.event.pull_request.number }}
+          echo "::group::Run PR Review"
+          python3 PR_Review_OpenAI.py ${{ github.event.pull_request.number }}
+          echo "::endgroup::"
