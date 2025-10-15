@@ -123,8 +123,7 @@ public class ApparelSizeProductReferenceTargetStrategy implements ProductReferen
             result = result + numbers.get(i);
             System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
              System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
-              System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
-              System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
+
 
         }
         return result;
