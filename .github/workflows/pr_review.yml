@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup & Dependencies
-        uses: ./.github/workflows
+        uses: ./.github/actions/setup
         with:
           python-version: "3.11"
 
