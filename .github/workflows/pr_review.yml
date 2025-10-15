@@ -4,25 +4,34 @@ on:
   pull_request:
     types: [opened, synchronize, edited, reopened]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   pr-review:
     runs-on: ubuntu-latest
-
     steps:
-      # stays as a separate step (can't be grouped because it's an action)
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # one grouped step for Python + dependencies (no subfolder, no path issues)
-      - name: Grouped Setup (Python + Dependencies)
+      - name: Setup, Checkout & Run (grouped)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
+          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+          WATSONX_URL: "https://us-south.ml.cloud.ibm.com"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         shell: bash
         run: |
-          echo "::group::Python"
-          python3 --version || true
-          python3 -m pip install --upgrade pip
+          set -euo pipefail
+
+          echo "::group::Checkout code"
+          git clone --depth=1 "https://x-access-token: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@github.com/Vaidehi693/OpenAI-PR-Review-main.git" .
+          git fetch --no-tags origin "${GITHUB_SHA}" --depth=1
+          git checkout -qf "${GITHUB_SHA}"
           echo "::endgroup::"
 
-          echo "::group::Install dependencies"
+          echo "::group::Python & deps"
+          python3 -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           else
@@ -30,14 +39,6 @@ jobs:
           fi
           echo "::endgroup::"
 
-      - name: Run AI PR Review
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
-          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
-          WATSONX_URL: "https://us-south.ml.cloud.ibm.com"
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
           echo "::group::Run PR Review"
-          python PR_Review_OpenAI.py ${{ github.event.pull_request.number }}
+          python3 PR_Review_OpenAI.py "${PR_NUMBER}"
           echo "::endgroup::"
