@@ -79,9 +79,9 @@ for f in java_files:
 You are a senior SAP Commerce Cloud (Hybris) technical architect and Java code reviewer with deep experience in
 platform extensions, itemtypes, interceptors, services, DAOs, strategies, and integration patterns.
 
-===================================================
-File: {filename}
-===================================================
+
+=================================================== File: {filename} ===================================================
+
 
 Java Code:
 {code}
