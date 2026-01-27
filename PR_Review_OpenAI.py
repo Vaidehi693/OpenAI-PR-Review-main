@@ -82,11 +82,11 @@ platform extensions, itemtypes, interceptors, services, DAOs, strategies, and in
 
 File: {filename}
 
-Java Code:
+Code Changes:
 {code}
 
 Instructions:
-1. Review this Java code and provide **SAP Commerce–specific best-practice review comments**.
+1. Review this Java and xml code and provide **SAP Commerce–specific best-practice review comments**.
 2. Analyze the code in the context of SAP Commerce architecture, including (where applicable):
    - Service / DAO / Strategy layer separation
    - Interceptors, Populators, Validators, and Facades
@@ -96,6 +96,7 @@ Instructions:
    - Cluster safety, caching, and cronjob compatibility
    - Upgrade safety (patch / release / CCv2 readiness)
    - Security and data integrity
+   - check the xml changes like beans , items.xml changes , spring injection 
 3. **Order all findings strictly by severity**, in this order:
    - Critical
    - Major
@@ -198,7 +199,7 @@ INFO:
 # -------------------
 print("\n" + "*"*80)
 #print("OpenAI Best-Practice Suggestions (Java Files Only)")
-print("Claude Best-Practice Suggestions (Java Files Only)")
+print("Claude Best-Practice Suggestions")
 print("*"*80)
 for filename, suggestions in results.items():
     print("\n")
