@@ -45,6 +45,11 @@
                         <modifiers/>
                         <persistence type="property"/>
                     </attribute>
+                    <attribute qualifier="color" type="localized:java.lang.String"
+                               metatype="VariantAttributeDescriptor">
+                        <modifiers/>
+                        <persistence type="property"/>
+                    </attribute>
                 </attributes>
             </itemtype>
 
