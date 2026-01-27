@@ -75,26 +75,7 @@ for f in java_files:
     MAX_CODE_LENGTH = 4000
     if len(code) > MAX_CODE_LENGTH:
         code = code[:MAX_CODE_LENGTH] + "\n... (truncated)"
-#    prompt = f"""
-#You are a senior Java software architect and code reviewer.
-#File: {filename}
-#Java Code:
-#{code}
-#Instructions:
-#1. Review this Java code and provide **best-practice improvement suggestions**.
-#2. Focus on: readability, maintainability, performance, security, testing, and design patterns.
-#3. Mark each finding with a severity level:
- #  - **Critical**: Hardcoded passwords, potential NullPointerExceptions, insecure logic, or code that may cause runtime failures.
- #  - **Major**: Missing JavaDocs on public classes/methods, poor exception handling, duplicate logic, resource leaks.
- #  - **Minor**: Naming issues, unused imports, minor formatting or readability issues.
- #  - **Info**: Optional design improvements or general recommendations.
-#4. Write suggestions in this format:
-#   - Suggestion 1 [Severity]
-#   - Suggestion 2 [Severity]
- #  - Suggestion 3 [Severity]
-#5. If no issues are found, reply with: "No suggestions, code follows best practices."
-#"""
-prompt = f"""
+    prompt = f"""
 You are a senior SAP Commerce Cloud (Hybris) technical architect and Java code reviewer with deep experience in
 platform extensions, itemtypes, interceptors, services, DAOs, strategies, and integration patterns.
 
@@ -157,8 +138,8 @@ Severity guidelines:
 Output rules:
 - Do NOT include generic Java advice unless it applies to SAP Commerce.
 - Do NOT repeat the code.
-- Be concise, precise, and actionable.
-""".strip()
+- Be concise, precise, and actionable."
+"""
     try:
 
        # CLAUDE 
