@@ -95,12 +95,24 @@ Instructions:
 5. If no issues are found, reply with: "No suggestions, code follows best practices."
 """
     try:
-        response = client.chat.completions.create(
-            model=MODEL_ID,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
+
+       # CLAUDE 
+
+        response = client.messages.create(
+        model=MODEL_ID,
+        max_tokens=800,
+        temperature=0.3,
+        messages=[{"role": "user", "content": prompt}],
         )
-        feedback = response.choices[0].message.content
+        feedback = response.content[0].text
+
+       # OPEN AI  
+       # response = client.chat.completions.create(
+       #     model=MODEL_ID,
+       #     messages=[{"role": "user", "content": prompt}],
+       #     temperature=0.3,
+       # )
+       # feedback = response.choices[0].message.content
     except Exception as e:
         feedback = f":x: Claude API call failed: {str(e)}"
     results[filename] = feedback
