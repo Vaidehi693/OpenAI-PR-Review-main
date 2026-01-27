@@ -94,7 +94,6 @@ for f in java_files:
  #  - Suggestion 3 [Severity]
 #5. If no issues are found, reply with: "No suggestions, code follows best practices."
 #"""
-
 prompt = f"""
 You are a senior SAP Commerce Cloud (Hybris) technical architect and Java code reviewer with deep experience in
 platform extensions, itemtypes, interceptors, services, DAOs, strategies, and integration patterns.
@@ -160,11 +159,6 @@ Output rules:
 - Do NOT repeat the code.
 - Be concise, precise, and actionable."
 """
-
-
-
-
-
     try:
 
        # CLAUDE 
