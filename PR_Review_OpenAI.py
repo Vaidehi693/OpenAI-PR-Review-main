@@ -52,7 +52,7 @@ java_files = []
 for file in files_data:
     filename = file.get("filename")
     patch = file.get("patch")
-    if filename and patch and filename.endswith(".java"):
+    if filename and filename.endswith((".java", ".xml")):
         # fetch full file content
         file_url = f"https://api.github.com/repos/{ORG}/{REPO}/contents/{filename}"
         file_resp = requests.get(file_url, headers=headers).json()
