@@ -27,8 +27,8 @@ ORG = "Vaidehi693"
 # Claude API key (from env)
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 client = Anthropic(api_key=CLAUDE_API_KEY)
-MODEL_ID = "claude-3-5-sonnet-20240620"  # strong for code review CLAUDE
-
+#MODEL_ID = "claude-3-5-sonnet-20240620"  # strong for code review CLAUDE
+MODEL_ID = "claude-3-sonnet-20240229"
 
 
 if len(sys.argv) < 2:
