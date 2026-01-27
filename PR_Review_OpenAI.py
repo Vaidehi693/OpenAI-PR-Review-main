@@ -2,7 +2,8 @@ import sys
 import os
 import requests
 import base64
-from openai import OpenAI
+from anthropic import Anthropic
+#from openai import OpenAI
 # -------------------
 # Config
 # -------------------
