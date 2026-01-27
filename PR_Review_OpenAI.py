@@ -75,25 +75,96 @@ for f in java_files:
     MAX_CODE_LENGTH = 4000
     if len(code) > MAX_CODE_LENGTH:
         code = code[:MAX_CODE_LENGTH] + "\n... (truncated)"
-    prompt = f"""
-You are a senior Java software architect and code reviewer.
+#    prompt = f"""
+#You are a senior Java software architect and code reviewer.
+#File: {filename}
+#Java Code:
+#{code}
+#Instructions:
+#1. Review this Java code and provide **best-practice improvement suggestions**.
+#2. Focus on: readability, maintainability, performance, security, testing, and design patterns.
+#3. Mark each finding with a severity level:
+ #  - **Critical**: Hardcoded passwords, potential NullPointerExceptions, insecure logic, or code that may cause runtime failures.
+ #  - **Major**: Missing JavaDocs on public classes/methods, poor exception handling, duplicate logic, resource leaks.
+ #  - **Minor**: Naming issues, unused imports, minor formatting or readability issues.
+ #  - **Info**: Optional design improvements or general recommendations.
+#4. Write suggestions in this format:
+#   - Suggestion 1 [Severity]
+#   - Suggestion 2 [Severity]
+ #  - Suggestion 3 [Severity]
+#5. If no issues are found, reply with: "No suggestions, code follows best practices."
+#"""
+
+prompt = f"""
+You are a senior SAP Commerce Cloud (Hybris) technical architect and Java code reviewer with deep experience in
+platform extensions, itemtypes, interceptors, services, DAOs, strategies, and integration patterns.
+
 File: {filename}
+
 Java Code:
 {code}
+
 Instructions:
-1. Review this Java code and provide **best-practice improvement suggestions**.
-2. Focus on: readability, maintainability, performance, security, testing, and design patterns.
-3. Mark each finding with a severity level:
-   - **Critical**: Hardcoded passwords, potential NullPointerExceptions, insecure logic, or code that may cause runtime failures.
-   - **Major**: Missing JavaDocs on public classes/methods, poor exception handling, duplicate logic, resource leaks.
-   - **Minor**: Naming issues, unused imports, minor formatting or readability issues.
-   - **Info**: Optional design improvements or general recommendations.
-4. Write suggestions in this format:
-   - Suggestion 1 [Severity]
-   - Suggestion 2 [Severity]
-   - Suggestion 3 [Severity]
-5. If no issues are found, reply with: "No suggestions, code follows best practices."
+1. Review this Java code and provide **SAP Commerce–specific best-practice review comments**.
+2. Analyze the code in the context of SAP Commerce architecture, including (where applicable):
+   - Service / DAO / Strategy layer separation
+   - Interceptors, Populators, Validators, and Facades
+   - FlexibleSearch usage and performance
+   - Transaction handling and modelService usage
+   - Spring bean configuration and dependency injection
+   - Cluster safety, caching, and cronjob compatibility
+   - Upgrade safety (patch / release / CCv2 readiness)
+   - Security and data integrity
+3. **Order all findings strictly by severity**, in this order:
+   - Critical
+   - Major
+   - Minor
+   - Info
+
+For each finding, use the following format **exactly**:
+
+- **[Severity] Issue**: Clear description of the problem
+  **SAP Commerce Context**: Why this matters specifically in SAP Commerce
+  **Suggested Fix**: Concrete, actionable recommendation (code-level or design-level)
+
+Severity guidelines:
+- **Critical**
+  - NPE risks in interceptors or strategies
+  - Hardcoded credentials, URLs, or catalog/version assumptions
+  - FlexibleSearch performance issues (missing indexes, unbounded queries)
+  - Incorrect modelService usage (save in loops, missing refresh, wrong transaction scope)
+  - Logic that may break clustering, cronjobs, or OCC APIs
+
+- **Major**
+  - Missing JavaDocs on public services/strategies
+  - Poor exception handling (swallowed exceptions, generic RuntimeException)
+  - Tight coupling between layers (Controller → DAO, Strategy → Model access)
+  - Repeated logic that should be refactored into services or utilities
+  - Lack of validation before persistence
+
+- **Minor**
+  - Naming inconsistencies with SAP Commerce conventions
+  - Unused imports, redundant logging, minor formatting issues
+  - Non-standard logging patterns
+
+- **Info**
+  - Optional design improvements
+  - Performance or readability enhancements
+  - Suggestions for future extensibility or reuse
+
+4. If **no issues are found**, reply with exactly:
+"No suggestions, code follows SAP Commerce best practices."
+
+Output rules:
+- Do NOT include generic Java advice unless it applies to SAP Commerce.
+- Do NOT repeat the code.
+- Be concise, precise, and actionable.
 """
+
+
+
+
+
     try:
 
        # CLAUDE 
