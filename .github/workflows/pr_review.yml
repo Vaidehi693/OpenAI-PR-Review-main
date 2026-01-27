@@ -34,6 +34,7 @@ jobs:
           else
            pip install requests anthropic
           fi
+          pip install requests anthropic
           echo "::endgroup::"
 
       # 2) Run the review
