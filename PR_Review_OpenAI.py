@@ -172,10 +172,14 @@ print("\n" + "="*80)
 print("Claude Best-Practice Suggestions (Java Files Only)")
 print("="*80)
 for filename, suggestions in results.items():
-    print("\n" + "="*80)
-    print(f"\nFile: {filename}")
+    print("\n" + "="*180)
+    print(f"\n==== File: {filename} ======")
+    print("="*180)
+    print("\n")
+    print("\n")
     print(suggestions)
-    print("="*80)
+    print("\n")
+    print("\n")
 
 
 
