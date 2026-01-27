@@ -157,8 +157,8 @@ Severity guidelines:
 Output rules:
 - Do NOT include generic Java advice unless it applies to SAP Commerce.
 - Do NOT repeat the code.
-- Be concise, precise, and actionable."
-"""
+- Be concise, precise, and actionable.
+""".strip()
     try:
 
        # CLAUDE 
