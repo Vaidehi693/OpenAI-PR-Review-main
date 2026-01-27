@@ -28,8 +28,8 @@ ORG = "Vaidehi693"
 CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
 client = Anthropic(api_key=CLAUDE_API_KEY)
 #MODEL_ID = "claude-3-5-sonnet-20240620"  # strong for code review CLAUDE
-MODEL_ID = "claude-3-sonnet-20240229"
-
+#MODEL_ID = "claude-3-sonnet-20240229"
+MODEL_ID = "claude-sonnet-4-5-20250929"
 
 if len(sys.argv) < 2:
     print("Usage: python pr_review_agent_openai.py <PR_NUMBER>")
