@@ -80,8 +80,7 @@ You are a senior SAP Commerce Cloud (Hybris) technical architect and Java code r
 platform extensions, itemtypes, interceptors, services, DAOs, strategies, and integration patterns.
 
 
-=================================================== File: {filename} ===================================================
-
+File: {filename}
 
 Java Code:
 {code}
@@ -137,10 +136,38 @@ Severity guidelines:
 4. If **no issues are found**, reply with exactly:
 "No suggestions, code follows SAP Commerce best practices."
 
-Output rules:
+OUTPUT FORMAT RULES (must follow exactly):
 - Do NOT include generic Java advice unless it applies to SAP Commerce.
+- Be concise, precise, and actionable.
+- Plain text only. Do NOT use Markdown (#, ##, **, ---, ```).
+- Do NOT add horizontal separators.
 - Do NOT repeat the code.
-- Be concise, precise, and actionable."
+- Keep each item short and actionable.
+- Sort findings strictly by severity: Critical, then Major, then Minor, then Info.
+- If a section has no items, write "None".
+
+Return exactly this template:
+
+CRITICAL:
+1) Issue: ...
+   SAP Commerce Context: ...
+   Suggested Fix: ...
+2) ...
+
+MAJOR:
+1) Issue: ...
+   SAP Commerce Context: ...
+   Suggested Fix: ...
+
+MINOR:
+1) Issue: ...
+   SAP Commerce Context: ...
+   Suggested Fix: ...
+
+INFO:
+1) Issue: ...
+   SAP Commerce Context: ...
+   Suggested Fix: ..."
 """
     try:
 
