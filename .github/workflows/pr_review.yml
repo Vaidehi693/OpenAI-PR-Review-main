@@ -39,6 +39,8 @@ jobs:
       # 2) Run the review
       - name: PR Review Comments 
         env:
+          GHP_KEY: ${{ secrets.GHP_KEY }}
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
