@@ -11,10 +11,23 @@ GITHUB_TOKEN=(os.getenv("ghp_KEY")).strip()
 #GITHUB_TOKEN = "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".strip()
 REPO = "OpenAI-PR-Review-main"
 ORG = "Vaidehi693"
+
+
 # OpenAI key (⚠️ for quick test only, better use env variable later)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY)
-MODEL_ID = "gpt-4o-mini"   # small + cheap, good for code review
+#OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+#client = OpenAI(api_key=OPENAI_API_KEY)
+#MODEL_ID = "gpt-4o-mini"   # small + cheap, good for code review open AI
+
+
+#CLAUDE
+
+# Claude API key (from env)
+CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+client = Anthropic(api_key=CLAUDE_API_KEY)
+MODEL_ID = "claude-3-5-sonnet-20240620"  # strong for code review CLAUDE
+
+
+
 if len(sys.argv) < 2:
     print("Usage: python pr_review_agent_openai.py <PR_NUMBER>")
     sys.exit(1)
@@ -86,13 +99,14 @@ Instructions:
         )
         feedback = response.choices[0].message.content
     except Exception as e:
-        feedback = f":x: OpenAI call failed: {str(e)}"
+        feedback = f":x: Claude API call failed: {str(e)}"
     results[filename] = feedback
 # -------------------
 # Output
 # -------------------
 print("\n" + "="*80)
-print("OpenAI Best-Practice Suggestions (Java Files Only)")
+#print("OpenAI Best-Practice Suggestions (Java Files Only)")
+print("Claude Best-Practice Suggestions (Java Files Only)")
 print("="*80)
 for filename, suggestions in results.items():
     print(f"\nFile: {filename}")
