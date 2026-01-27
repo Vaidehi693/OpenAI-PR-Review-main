@@ -167,12 +167,14 @@ Output rules:
 # -------------------
 # Output
 # -------------------
-print("\n" + "="*80)
+print("\n" + "*"*80)
 #print("OpenAI Best-Practice Suggestions (Java Files Only)")
 print("Claude Best-Practice Suggestions (Java Files Only)")
-print("="*80)
+print("*"*80)
 for filename, suggestions in results.items():
-    print("\n" + "="*120)
+    print("\n")
+    print("\n")
+    print("="*120)
     print(f"\n File: {filename} ")
     print("="*120)
     print("\n")
