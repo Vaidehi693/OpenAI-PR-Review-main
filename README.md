@@ -136,10 +136,7 @@ This asset currently supports **GitHub only**.
 | Secret Name | Required | Description |
 |------------|----------|-------------|
 | `GITHUB_TOKEN` | Yes | GitHub authentication |
-| `OPENAI_API_KEY` | Yes | OpenAI API key |
 | `CLAUDE_API_KEY` | Optional | Claude support |
-| `WATSONX_API_KEY` | Optional | IBM watsonx |
-| `WATSONX_PROJECT_ID` | Optional | IBM watsonx project |
 
 ---
 
