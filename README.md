@@ -85,6 +85,21 @@ sequenceDiagram
 - `.java`
 - `.xml`
 
+
+---
+
+## Support
+
+This asset currently supports **GitHub only**.
+
+- Designed to run using **GitHub Actions**
+- Using claude (model :"claude-sonnet-4-5-20250929") for generating the Review comments 
+- Triggered by **GitHub Pull Request** events
+- Review comments are posted directly on **GitHub Pull Requests**
+- Reviews the PRs as per SAP commerce cloud coding Standards
+- Can be mofidiied as per the project requirements 
+
+
 ---
 
 ## Repository Structure
@@ -147,19 +162,8 @@ sequenceDiagram
 
 ## Roadmap
 
-- Additional language support
-- Configurable rules
-- Severity tagging
+- Connect to ICA and Intellj / eclipse / vs code 
+- Automatic commits after review comments  
 - Review analytics
-
-
-## Support
-
-This asset currently supports **GitHub only**.
-
-- Designed to run using **GitHub Actions**
-- Triggered by **GitHub Pull Request** events
-- Review comments are posted directly on **GitHub Pull Requests**
-- Reviews the PRs as per SAP commerce cloud coding Standards
 
 
