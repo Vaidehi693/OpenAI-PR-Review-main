@@ -97,7 +97,7 @@ This asset currently supports **GitHub only**.
 - Triggered by **GitHub Pull Request** events
 - Review comments are posted directly on **GitHub Pull Requests**
 - Reviews the PRs as per SAP commerce cloud coding Standards
-- Can be mofidiied as per the project requirements 
+- Can be modified and customized as per the project requirements 
 
 
 ---
