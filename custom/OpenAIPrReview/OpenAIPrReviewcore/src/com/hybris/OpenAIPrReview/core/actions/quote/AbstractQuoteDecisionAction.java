@@ -37,7 +37,9 @@ public abstract class AbstractQuoteDecisionAction<T extends BusinessProcessModel
 	@Override
 	public final String execute(final T process) throws RetryLaterException, Exception
 	{
+		 executeAction(process).toString();
 		return executeAction(process).toString();
+		
 	}
 
 
