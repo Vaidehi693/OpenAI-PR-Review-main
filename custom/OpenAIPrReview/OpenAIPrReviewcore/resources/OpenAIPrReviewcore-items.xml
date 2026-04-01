@@ -24,6 +24,9 @@
             <value code="SILVER"/>
             <value code="WHITE"/>
             <value code="YELLOW"/>
+             <value code="YELLOW"/>
+              <value code="YELLOW"/>
+                 <value code="YELLOW"/>
         </enumtype>
     </enumtypes>
 
