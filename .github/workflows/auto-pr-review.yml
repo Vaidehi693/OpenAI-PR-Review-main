@@ -17,68 +17,135 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get PR diff
-        id: diff
+      - name: Get PR diff and analyze
+        id: analyze
         run: |
+          # Get PR diff
           gh pr diff ${{ github.event.pull_request.number }} > pr_diff.txt
-          echo "diff_size=$(wc -c < pr_diff.txt)" >> $GITHUB_OUTPUT
+          
+          # Analyze for SAP Commerce issues
+          ISSUES=""
+          
+          # Check for duplicate enum values
+          if grep -q '<value code=' pr_diff.txt; then
+            DUPLICATES=$(grep -o 'code="[^"]*"' pr_diff.txt | sort | uniq -d)
+            if [ -n "$DUPLICATES" ]; then
+              for DUP in $DUPLICATES; do
+                ISSUES="${ISSUES}
+
+#### 🔴 Critical: Duplicate Enum Value
+- **Value:** \`${DUP//\"/}\`
+- **Issue:** This value is defined multiple times in the enumtype
+- **Impact:** System initialization will fail. SAP Commerce does not allow duplicate enum values
+- **Fix:** Remove the duplicate entry. Each enum value must be unique within its enumtype
+"
+              done
+            fi
+          fi
+          
+          # Check for Boolean attributes without proper configuration
+          if grep -q 'type="java.lang.Boolean"' pr_diff.txt; then
+            if ! grep -q '<modifiers optional="false"' pr_diff.txt; then
+              ISSUES="${ISSUES}
+
+#### 🔴 Critical: Boolean Attribute Configuration
+- **Issue:** Boolean attribute found without mandatory modifier
+- **Impact:** Can store null values, causing NullPointerExceptions
+- **Fix:** Add \`<modifiers optional=\"false\"/>\` and \`<defaultvalue>Boolean.FALSE</defaultvalue>\`
+"
+            fi
+          fi
+          
+          # Check for Jalo classes (deprecated)
+          if grep -q 'jaloclass=' pr_diff.txt; then
+            ISSUES="${ISSUES}
+
+#### 🟡 High Priority: Jalo Classes Referenced (Deprecated Pattern)
+- **Issue:** Explicit \`jaloclass\` attributes found in itemtype definitions
+- **Impact:** Since SAP Commerce 6.x, Jalo layer is deprecated. Creates maintenance overhead
+- **Fix:** Remove \`jaloclass\` attributes. Platform auto-generates Jalo classes when needed
+"
+          fi
+          
+          # Check for missing indexes on items.xml
+          if grep -q '<itemtype' pr_diff.txt && ! grep -q '<index' pr_diff.txt; then
+            ISSUES="${ISSUES}
+
+#### 🟡 High Priority: Missing Performance Indexes
+- **Issue:** New itemtypes without index definitions
+- **Impact:** FlexibleSearch queries will perform full table scans
+- **Fix:** Add indexes on frequently queried attributes
+"
+          fi
+          
+          # Save issues to file
+          echo "$ISSUES" > issues.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Analyze changes
-        id: analyze
-        run: |
-          # Check for duplicate enum values
-          DUPLICATES=$(grep -o 'code="[^"]*"' pr_diff.txt | sort | uniq -d | wc -l)
-          echo "duplicates=$DUPLICATES" >> $GITHUB_OUTPUT
-          
-          # Check for Boolean without mandatory
-          BOOL_ISSUES=$(grep -c 'type="java.lang.Boolean"' pr_diff.txt || echo "0")
-          echo "bool_issues=$BOOL_ISSUES" >> $GITHUB_OUTPUT
-
-      - name: Generate and post review
+      - name: Post BOB review
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           BRANCH=${{ github.event.pull_request.head.ref }}
           FILES_CHANGED=${{ github.event.pull_request.changed_files }}
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           
-          # Read the diff
-          DIFF=$(cat pr_diff.txt)
+          # Read issues
+          ISSUES=$(cat issues.txt)
           
-          # Check for critical issues
-          CRITICAL=""
-          if grep -q 'code="YELLOW"' pr_diff.txt && [ $(grep -c 'code="YELLOW"' pr_diff.txt) -gt 1 ]; then
-            CRITICAL="#### 🔴 Critical: Duplicate Enum Value
-- **Issue:** The value \`YELLOW\` is defined multiple times
-- **Impact:** System initialization will fail
-- **Fix:** Remove duplicate entries"
+          # Determine if there are critical issues
+          if [ -z "$ISSUES" ] || [ "$ISSUES" = "" ]; then
+            ISSUES_SECTION="### ✅ No Critical Issues Found
+
+All changes look good! Remember to test thoroughly."
+          else
+            ISSUES_SECTION="### ⚠️ Issues Found
+$ISSUES"
           fi
           
-          # Generate review
-          cat << 'EOF' | gh pr comment $PR_NUMBER --body-file -
-          ## 🤖 AI Code Review - PR #$PR_NUMBER
+          # Generate BOB-style review
+          cat << EOF | gh pr comment $PR_NUMBER --body-file -
+## 🤖 BOB AI Code Review - PR #${PR_NUMBER}
 
-          ### 📊 Change Summary
-          - **Branch:** $BRANCH
-          - **Files Changed:** $FILES_CHANGED
-          - **Auto-generated on:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+### 📊 Change Summary
+- **Branch:** ${BRANCH}
+- **Files Changed:** ${FILES_CHANGED}
+- **Reviewed:** ${TIMESTAMP}
 
-          ### ⚠️ Issues Found
-          $CRITICAL
+${ISSUES_SECTION}
 
-          ### 💡 Recommendations
-          1. **Review all changes carefully**
-          2. **Run tests:** \`ant clean all && ant yunitinit\`
-          3. **Verify in HAC**
+### 💡 Recommendations
 
-          ### 🧪 Testing Checklist
-          - [ ] Run \`ant clean all\`
-          - [ ] Execute \`ant yunitinit\`
-          - [ ] Verify in HAC
+1. **SAP Commerce Best Practices**
+   - Remove Jalo layer references (use service layer)
+   - Add proper indexes for performance
+   - Use explicit deployment configurations with typecodes
 
-          ---
-          *Generated by BOB AI Review System (GitHub Actions)*
-          EOF
+2. **Type System Configuration**
+   - Boolean attributes must be mandatory with default values
+   - Avoid duplicate enum values
+   - Add proper modifiers (optional, unique, read, write)
+
+3. **Testing Before Merge**
+   - Run \`ant clean all\` to rebuild
+   - Execute \`ant yunitinit\` to verify type system
+   - Check HAC for initialization errors
+
+### 🧪 Testing Checklist
+- [ ] Run \`ant clean all\` successfully
+- [ ] Execute \`ant yunitinit\` without errors
+- [ ] Verify changes in HAC → Platform → Types
+- [ ] Manual testing completed
+- [ ] No console errors or warnings
+
+### 📚 SAP Commerce Documentation
+- [Type System Guide](https://help.sap.com/docs/SAP_COMMERCE/d0224eca81e249cb821f2cdf45a82ace/8c0ab1c086691014b085e5e1d7c4e0c1.html)
+- [Service Layer Best Practices](https://help.sap.com/docs/SAP_COMMERCE)
+- [Items.xml Configuration](https://help.sap.com/docs/SAP_COMMERCE)
+
+---
+*Generated by BOB AI Review System | ${TIMESTAMP}*
+EOF
         env:
           GH_TOKEN: ${{ github.token }}
 
