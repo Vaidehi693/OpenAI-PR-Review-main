@@ -30,9 +30,9 @@ elif security find-generic-password -a "$USER" -s "github-repo" -w &>/dev/null; 
   echo "✅ Using repo from keychain"
 else
   GITHUB_REPO=$(git remote get-url origin \
-    | sed 's/https:\/\/.*github.ibm.com\///' \
-    | sed 's/git@github.ibm.com://' \
-    | sed 's/.git//')
+    | sed 's/https:\/\/github.com\///' \
+    | sed 's/git@github.com://' \
+    | sed 's/.git$//')
   if [ -n "$GITHUB_REPO" ]; then
     echo "✅ Auto-detected repo from git remote: $GITHUB_REPO"
     security add-generic-password -a "$USER" -s "github-repo" -w "$GITHUB_REPO"
@@ -45,50 +45,68 @@ else
 fi
 
 echo "📁 Repo: $GITHUB_REPO"
-echo "🔗 URL: https://github.ibm.com/api/v3/repos/$GITHUB_REPO/pulls?head=$BRANCH"
+echo "🔗 URL: https://api.github.com/repos/$GITHUB_REPO/pulls?head=$BRANCH"
 
 # ─── CREATE OR FIND PR ──────────────────────────────────────
 echo "📝 Creating PR automatically..."
 
-PR_RESPONSE=$(curl -s -X POST \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H "Content-Type: application/json" \
-  "https://github.ibm.com/api/v3/repos/$GITHUB_REPO/pulls" \
-  -d "{
-    \"title\": \"$BRANCH\",
-    \"head\": \"$BRANCH\",
-    \"base\": \"main\",
-    \"body\": \"Auto-created PR for $BRANCH\"
-  }")
-
-# Extract PR number using python3 (handles multiline JSON correctly)
-PR_NUMBER=$(echo "$PR_RESPONSE" | python3 -c "import sys,json; data=json.load(sys.stdin); print(data.get('number',''))" 2>/dev/null)
+# Check if PR already exists
+PR_NUMBER=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null)
 
 if [ -n "$PR_NUMBER" ]; then
-  echo "✅ PR #$PR_NUMBER created successfully!"
+  echo "✅ Found existing PR #$PR_NUMBER"
 else
-  echo "⚠️ PR may already exist, looking for existing PR..."
-
-  # Search for PR with the full branch reference (owner:branch format)
-  REPO_OWNER=$(echo "$GITHUB_REPO" | cut -d'/' -f1)
-  PR_FIND_RESPONSE=$(curl -s \
-    -H "Authorization: Bearer $GITHUB_TOKEN" \
-    "https://github.ibm.com/api/v3/repos/$GITHUB_REPO/pulls?head=${REPO_OWNER}:${BRANCH}&state=open")
-
-  # Extract PR number from array response
-  PR_NUMBER=$(echo "$PR_FIND_RESPONSE" | python3 -c "import sys,json; data=json.load(sys.stdin); print(data[0]['number'] if data and len(data) > 0 else '')" 2>/dev/null)
-
-  if [ -n "$PR_NUMBER" ]; then
-    echo "✅ Found existing PR #$PR_NUMBER"
+  # Create new PR using gh CLI
+  PR_URL=$(gh pr create --head "$BRANCH" --base main --title "$BRANCH" --body "Auto-created PR for $BRANCH" 2>&1)
+  
+  if [ $? -eq 0 ]; then
+    # Extract PR number from URL (e.g., https://github.com/user/repo/pull/123)
+    PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+    echo "✅ PR #$PR_NUMBER created successfully!"
   else
-    echo "⚠️ No PR found or created for $BRANCH — skipping BOB review."
-    echo "Debug: PR Find Response: $PR_FIND_RESPONSE"
+    echo "❌ Failed to create PR: $PR_URL"
     exit 0
   fi
 fi
 
-# ─── TRIGGER BOB REVIEW ─────────────────────────────────────
-echo "🤖 BOB is reviewing PR #$PR_NUMBER..."
-code --command "bob.reviewPR" --args "$PR_NUMBER"
+# ─── TRIGGER BOB AI REVIEW ─────────────────────────────────
+echo "🤖 Triggering BOB AI review for PR #$PR_NUMBER..."
 
-echo "✅ BOB review triggered for PR #$PR_NUMBER!"
+# Create a temporary file with the review request
+REVIEW_REQUEST=$(cat <<EOF
+Please review PR #$PR_NUMBER using the pr-review mode.
+
+Steps:
+1. Get the diff for the latest commit: git diff HEAD~1 HEAD
+2. Analyze changes for SAP Commerce best practices (especially Boolean attributes in items.xml)
+3. Generate comprehensive review following the format in sapcc_pr_review.yaml
+4. Post the review comment to PR #$PR_NUMBER using: gh pr comment $PR_NUMBER --body "<review>"
+
+Focus on:
+- Boolean attributes must be mandatory with default values
+- SAP Commerce type system best practices
+- Code quality and potential issues
+EOF
+)
+
+# Try to open VS Code with BOB in pr-review mode
+if command -v code &>/dev/null; then
+  echo "$REVIEW_REQUEST" | code --wait --new-window --goto "sapcc_pr_review.yaml:1:1" -
+  echo "✅ BOB review request opened in VS Code"
+  echo "📝 Please switch to 'pr-review' mode and process the review"
+elif [ -f "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" ]; then
+  echo "$REVIEW_REQUEST" | "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" --wait --new-window --goto "sapcc_pr_review.yaml:1:1" -
+  echo "✅ BOB review request opened in VS Code"
+  echo "� Please switch to 'pr-review' mode and process the review"
+else
+  echo ""
+  echo "⚠️ VS Code CLI not found. To complete the review:"
+  echo "   1. Open VS Code"
+  echo "   2. Switch BOB to 'pr-review' mode"
+  echo "   3. Tell BOB: 'Review PR #$PR_NUMBER'"
+  echo ""
+  echo "   Or install VS Code CLI: Cmd+Shift+P → 'Shell Command: Install code command in PATH'"
+fi
+
+echo ""
+echo "🔗 PR URL: https://github.com/$GITHUB_REPO/pull/$PR_NUMBER"
