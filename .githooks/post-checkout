@@ -1,0 +1,12 @@
+#!/bin/bash
+# Auto-install hooks after checkout (git clone, git checkout)
+
+# Only run on branch checkout, not file checkout
+if [ "$3" == "1" ]; then
+    echo "🔧 Auto-installing Git hooks..."
+    
+    # Check if we're in the repo root
+    if [ -f "setup-hooks.sh" ]; then
+        ./setup-hooks.sh
+    fi
+fi

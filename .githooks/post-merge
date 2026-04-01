@@ -1,0 +1,9 @@
+#!/bin/bash
+# Auto-install hooks after merge (triggered by git pull)
+
+echo "🔧 Auto-installing Git hooks after pull..."
+
+# Check if we're in the repo root
+if [ -f "setup-hooks.sh" ]; then
+    ./setup-hooks.sh
+fi

@@ -1,0 +1,94 @@
+#!/bin/bash
+echo "🚀 pre-push hook started!"
+
+BRANCH=$(git symbolic-ref --short HEAD)
+echo "🌿 Branch: $BRANCH"
+
+# ─── GITHUB TOKEN ───────────────────────────────────────────
+if [ -n "$GITHUB_TOKEN" ]; then
+  echo "✅ Using token from environment variable"
+elif security find-generic-password -a "$USER" -s "github-token" -w &>/dev/null; then
+  GITHUB_TOKEN=$(security find-generic-password -a "$USER" -s "github-token" -w)
+  echo "✅ Using token from keychain"
+elif command -v gh &>/dev/null; then
+  GITHUB_TOKEN=$(gh auth token)
+  echo "✅ Using token from GitHub CLI"
+else
+  echo "🔑 No GitHub token found. Enter your GitHub Token:"
+  read -s GITHUB_TOKEN
+  security add-generic-password -a "$USER" -s "github-token" -w "$GITHUB_TOKEN"
+  echo "✅ Token saved to keychain for future use"
+fi
+
+echo "🔑 Token: ${GITHUB_TOKEN:0:4}****"
+
+# ─── GITHUB REPO ────────────────────────────────────────────
+if [ -n "$GITHUB_REPO" ]; then
+  echo "✅ Using repo from environment variable"
+elif security find-generic-password -a "$USER" -s "github-repo" -w &>/dev/null; then
+  GITHUB_REPO=$(security find-generic-password -a "$USER" -s "github-repo" -w)
+  echo "✅ Using repo from keychain"
+else
+  GITHUB_REPO=$(git remote get-url origin \
+    | sed 's/https:\/\/.*github.ibm.com\///' \
+    | sed 's/git@github.ibm.com://' \
+    | sed 's/.git//')
+  if [ -n "$GITHUB_REPO" ]; then
+    echo "✅ Auto-detected repo from git remote: $GITHUB_REPO"
+    security add-generic-password -a "$USER" -s "github-repo" -w "$GITHUB_REPO"
+  else
+    echo "📁 No GitHub repo found. Enter your GitHub Repo (e.g. your-org/your-repo):"
+    read GITHUB_REPO
+    security add-generic-password -a "$USER" -s "github-repo" -w "$GITHUB_REPO"
+    echo "✅ Repo saved to keychain for future use"
+  fi
+fi
+
+echo "📁 Repo: $GITHUB_REPO"
+echo "🔗 URL: https://github.ibm.com/api/v3/repos/$GITHUB_REPO/pulls?head=$BRANCH"
+
+# ─── CREATE OR FIND PR ──────────────────────────────────────
+echo "📝 Creating PR automatically..."
+
+PR_RESPONSE=$(curl -s -X POST \
+  -H "Authorization: Bearer $GITHUB_TOKEN" \
+  -H "Content-Type: application/json" \
+  "https://github.ibm.com/api/v3/repos/$GITHUB_REPO/pulls" \
+  -d "{
+    \"title\": \"$BRANCH\",
+    \"head\": \"$BRANCH\",
+    \"base\": \"main\",
+    \"body\": \"Auto-created PR for $BRANCH\"
+  }")
+
+# Extract PR number using python3 (handles multiline JSON correctly)
+PR_NUMBER=$(echo "$PR_RESPONSE" | python3 -c "import sys,json; data=json.load(sys.stdin); print(data.get('number',''))" 2>/dev/null)
+
+if [ -n "$PR_NUMBER" ]; then
+  echo "✅ PR #$PR_NUMBER created successfully!"
+else
+  echo "⚠️ PR may already exist, looking for existing PR..."
+
+  # Search for PR with the full branch reference (owner:branch format)
+  REPO_OWNER=$(echo "$GITHUB_REPO" | cut -d'/' -f1)
+  PR_FIND_RESPONSE=$(curl -s \
+    -H "Authorization: Bearer $GITHUB_TOKEN" \
+    "https://github.ibm.com/api/v3/repos/$GITHUB_REPO/pulls?head=${REPO_OWNER}:${BRANCH}&state=open")
+
+  # Extract PR number from array response
+  PR_NUMBER=$(echo "$PR_FIND_RESPONSE" | python3 -c "import sys,json; data=json.load(sys.stdin); print(data[0]['number'] if data and len(data) > 0 else '')" 2>/dev/null)
+
+  if [ -n "$PR_NUMBER" ]; then
+    echo "✅ Found existing PR #$PR_NUMBER"
+  else
+    echo "⚠️ No PR found or created for $BRANCH — skipping BOB review."
+    echo "Debug: PR Find Response: $PR_FIND_RESPONSE"
+    exit 0
+  fi
+fi
+
+# ─── TRIGGER BOB REVIEW ─────────────────────────────────────
+echo "🤖 BOB is reviewing PR #$PR_NUMBER..."
+code --command "bob.reviewPR" --args "$PR_NUMBER"
+
+echo "✅ BOB review triggered for PR #$PR_NUMBER!"
