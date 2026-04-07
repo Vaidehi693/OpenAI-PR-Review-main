@@ -31,6 +31,8 @@ public class DefaultSimpleSuggestionService implements SimpleSuggestionService
 	public List<ProductModel> getReferencesForPurchasedInCategory(final CategoryModel category, final UserModel user,
 			final ProductReferenceTypeEnum referenceType, final boolean excludePurchased, final Integer limit)
 	{
+        System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
+        System.out.println("Intermediate Result: " + result);  // Unnecessary print statement
 		return getSimpleSuggestionDao().findProductsRelatedToPurchasedProductsByCategory(category, user, referenceType,
 				excludePurchased, limit);
 	}
